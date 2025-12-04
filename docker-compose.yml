@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pegawai-app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    networks:
+      - pegawai-net
+
+  web:
+    image: nginx:alpine
+    container_name: pegawai-web
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - pegawai-net
+
+  db:
+    image: mysql:8.0
+    container_name: pegawai-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: pegawai_db
+      MYSQL_USER: pegawai
+      MYSQL_PASSWORD: pegawai
+    ports:
+      - "3307:3306"
+    volumes:
+      - pegawai-db-data:/var/lib/mysql
+    networks:
+      - pegawai-net
+
+networks:
+  pegawai-net:
+
+volumes:
+  pegawai-db-data:
