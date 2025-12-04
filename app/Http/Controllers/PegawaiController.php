@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Validation\ValidationException;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PegawaiController extends Controller
 {
@@ -65,7 +66,7 @@ class PegawaiController extends Controller
                 $e->errors()
             );
         } catch (Exception $e) {
-            return ApiResponse::error("Gagal memperbarui pegawai", 500, $e->getMessage());
+            return ApiResponse::error("Gagal menambahkan pegawai", 500, $e->getMessage());
         }
     }
 
@@ -145,5 +146,29 @@ class PegawaiController extends Controller
             'npwp'          => 'nullable|string',
             'foto'          => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
+    }
+
+    public function print(Request $request)
+    {
+        $query = Pegawai::with(['golongan', 'eselon', 'jabatan', 'agama', 'unitKerja']);
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nip', 'like', "%{$search}%")
+                ->orWhere('nama', 'like', "%{$search}%");
+            });
+        }
+
+        if ($unitId = $request->get('unit_kerja_id')) {
+            $query->where('unit_kerja_id', $unitId);
+        }
+
+        $pegawai = $query->orderBy('nama')->get();
+
+        $pdf = Pdf::loadView('pdf.pegawai', [
+            'pegawai' => $pegawai
+        ])->setPaper('A4', 'landscape'); // ⬅️ banyak kolom, pakai landscape
+
+        return $pdf->download('daftar-pegawai.pdf');
     }
 }

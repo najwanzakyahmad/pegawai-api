@@ -12,16 +12,19 @@ use App\Http\Controllers\UnitKerjaController;
 
 Route::post('/login', [AuthController::class, 'login']);
 
+Route::get('/pegawai/print', [PegawaiController::class, 'print'])
+    ->name('pegawai.print');
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
 
-});
+    Route::apiResource('users', UserController::class);
+    Route::apiResource('pegawai', PegawaiController::class);
 
-Route::apiResource('users', UserController::class);
-Route::apiResource('pegawai', PegawaiController::class);
-Route::apiResource('golongan', GolonganController::class);
-Route::apiResource('eselon', EselonController::class);
-Route::apiResource('jabatan', JabatanController::class);
-Route::apiResource('agama', AgamaController::class);
-Route::apiResource('unit-kerja', UnitKerjaController::class);
+    Route::apiResource('golongan', GolonganController::class);
+    Route::apiResource('eselon', EselonController::class);
+    Route::apiResource('jabatan', JabatanController::class);
+    Route::apiResource('agama', AgamaController::class);
+    Route::apiResource('unit-kerja', UnitKerjaController::class);
+});
