@@ -35,6 +35,9 @@ RUN composer install \
     --optimize-autoloader \
     --no-interaction
 
+# Buat symlink public/storage -> storage/app/public
+RUN php artisan storage:link || true
+
 # Optional optimasi Laravel (kalau sering ubah route bisa dimatikan)
 RUN php artisan config:clear && php artisan cache:clear \
     && php artisan config:cache \
